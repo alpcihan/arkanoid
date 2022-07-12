@@ -1,0 +1,5 @@
+#ifndef DIRECTORIES
+
+#define RESOURCE_DIR "${CMAKE_SOURCE_DIR}/resources/"
+
+#endif
