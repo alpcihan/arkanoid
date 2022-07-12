@@ -5,8 +5,5 @@
 
 namespace path
 {
-    std::string resource(std::string str)
-    {
-        return RESOURCE_DIR + str;
-    }
+    std::string resource(std::string str);
 }
