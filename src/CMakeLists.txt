@@ -1,6 +1,7 @@
 # add source files
 file(GLOB_RECURSE SOURCE
 "ar-arcanoid.cpp"
+"pose/*"
 )
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE})
