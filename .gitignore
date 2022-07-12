@@ -1,0 +1,8 @@
+# VSCode
+.vscode
+
+# CMake
+build
+
+# OS
+.DS_Store
