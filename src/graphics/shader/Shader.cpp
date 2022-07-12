@@ -2,9 +2,9 @@
 
 namespace gfx
 {
-Shader::Shader(const std::string &vertexSrcFilePath, const std::string &fragmentSrcFilePath)
+Shader::Shader(const std::string &path)
 {
-    this->init(vertexSrcFilePath, fragmentSrcFilePath);
+    this->init(path);
 }
 
 Shader::~Shader()
@@ -47,12 +47,13 @@ void Shader::setMat4(const std::string &name, glm::mat4 &matrix) const
     glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
-void Shader::init(const std::string &vertexSrcFilePath, const std::string &fragmentSrcFilePath)
+void Shader::init(const std::string &path)
 {
     this->programId = glCreateProgram();
 
-    const std::string vertexShaderSrc = readFile(vertexSrcFilePath);
-    const std::string fragmentShaderSrc = readFile(fragmentSrcFilePath);
+    std::string vertexShaderSrc; 
+    std::string fragmentShaderSrc;
+    readFile(path, vertexShaderSrc, fragmentShaderSrc);
 
     const unsigned int vertexShaderId = this->createShader(ShaderType::Vertex, vertexShaderSrc.c_str());
     const unsigned int fragmentShaderId = this->createShader(ShaderType::Fragment, fragmentShaderSrc.c_str());
@@ -66,24 +67,48 @@ void Shader::init(const std::string &vertexSrcFilePath, const std::string &fragm
     glDeleteShader(fragmentShaderId);
 }
 
-std::string Shader::readFile(const std::string &shaderSrcFilePath) const
+void Shader::readFile(const std::string &path, std::string& vertSrc, std::string& fragSrc) const
 {   
-    std::ifstream shaderFile(shaderSrcFilePath);
+    std::ifstream shaderFile(path);
     
     if (shaderFile.fail())
     {
-        std::cout << "Failed to open shader file path: " <<  shaderSrcFilePath << std::endl;
-        return "";
+        std::cout << "Failed to open shader file path: " <<  path << std::endl;
     }
 
-    std::string shaderSourceCode = "";
+    vertSrc = "";
+    fragSrc = "";
+    bool isVert = false, isFrag = false;
+    int vertCount = 0, fragCount = 0;
     std::string line;
     while (getline(shaderFile, line))
     {
-        shaderSourceCode += line + '\n';
+        // check if vert or frag
+        if(line.find("#VERT") != std::string::npos)
+        {
+            isVert = true;
+            isFrag = false;
+            vertCount++;
+            continue;
+        }
+        else if(line.find("#FRAG") != std::string::npos)
+        {
+            isFrag = true;
+            isVert = false;
+            fragCount++;
+            continue;
+        }
+
+        if(isVert)
+            vertSrc += line + '\n';
+        else if(isFrag)
+            fragSrc += line + '\n';
     }
 
-    return shaderSourceCode;
+    if(vertCount != 1 || fragCount != 1 )
+    {
+        std::cout << "Invalid amount of shader at path: " << path << std::endl; 
+    }
 }
 
 unsigned int Shader::createShader(const ShaderType shaderType, const char *shaderSource) const

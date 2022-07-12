@@ -8,7 +8,7 @@ namespace gfx
 class Shader
 {
 public:
-    Shader(const std::string &vertexSrcFilePath, const std::string &fragmentSrcFilePath);
+    Shader(const std::string &path);
     ~Shader();
 
     void bind() const;
@@ -20,8 +20,8 @@ public:
     void setMat4(const std::string &name, glm::mat4 &value) const;
 
 private:
-    void init(const std::string &vertexSrcFilePath, const std::string &fragmentSrcFilePath);
-    std::string readFile(const std::string &shaderSrcFilePath) const;
+    void init(const std::string &path);
+    void readFile(const std::string &path, std::string& vertSrc, std::string& fragSrc) const;
     unsigned int createShader(const ShaderType shaderType, const char *shaderSource) const;
     void link() const;
 
