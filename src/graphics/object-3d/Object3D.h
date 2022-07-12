@@ -1,3 +1,5 @@
+#pragma once
+
 #include "graphics/shared.h"
 #include "graphics/shader/Shader.h"
 #include "graphics/texture/Texture.h"
@@ -28,10 +30,21 @@ class Object3D
         void draw();
         glm::mat4 getTransform();
 
-    private:
+    protected:
         unsigned int indexCount;
         unsigned int vao;
         unsigned int vboNorm, vboPos, vboUV, ebo;
+
+    protected:
+        Object3D() = default;
+        void init(
+            const std::vector<glm::vec3>& positions,
+            const std::vector<glm::vec3>& normals,
+            const std::vector<unsigned int>& indices, 
+            const std::vector<glm::vec2>& uvs,
+            std::shared_ptr<Texture> texture,
+            std::shared_ptr<Shader> shader
+        );
 };
 
 }

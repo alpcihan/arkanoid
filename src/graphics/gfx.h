@@ -9,3 +9,5 @@
 #include "graphics/shader/Shader.h"
 #include "graphics/texture/Texture.h"
 #include "graphics/object-3d/Object3D.h"
+#include "graphics/object-3d/shapes/Cube.h"
+#include "graphics/object-3d/shapes/Plane.h"
