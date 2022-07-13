@@ -4,7 +4,7 @@ namespace pose
 {
     void drawContourVec(const ContourVec &contourVec, Image *frame, const cv::Scalar &color)
     {
-        cv::drawContours(*frame, contourVec, -1, color, 2);
+        cv::drawContours(*frame, contourVec, -1, color, 1);
     }
 
     void drawPoints(
@@ -33,6 +33,20 @@ namespace pose
 
     void drawPoints(
         const Group<Point2d> &pointGroup,
+        Image *frame,
+        const cv::Scalar &color)
+    {
+        for (const auto &pointVec : pointGroup)
+        {
+            for (const auto &point : pointVec)
+            {
+                circle(*frame, point, 2, color, -1);
+            }
+        }
+    }
+
+    void drawPoints(
+        const Group<cv::Point2f> &pointGroup,
         Image *frame,
         const cv::Scalar &color)
     {

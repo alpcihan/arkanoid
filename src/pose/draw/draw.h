@@ -20,6 +20,12 @@ namespace pose
         const cv::Scalar &color2 = DEFAULT_POINT_COLOR2);
 
     void drawPoints(
+        const Group<cv::Point2f> &pointGroup,
+        Image *frame,
+        const cv::Scalar &color = DEFAULT_POINT_COLOR
+    );
+
+    void drawPoints(
         const Group<Point2d> &pointsGroup,
         Image *frame,
         const cv::Scalar &color = DEFAULT_POINT_COLOR);

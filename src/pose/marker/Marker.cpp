@@ -1,5 +1,6 @@
 #include "Marker.h"
 #include "pose/math/pose-estimation.h"
+#include "utils/utils.h"
 
 namespace pose
 {
@@ -50,15 +51,25 @@ namespace pose
     void Marker::estimateTransformation()
     {
         cv::Point2f cornersCameraCoord[4];
+ 
         for (int i = 0; i < 4; i++)
         {
-            // TODO: parameterize the camera resolution
-            float x = corners[i].x - 320;
-            float y = -corners[i].y + 240;
+            float x = corners[i].x - (WIDTH * 0.5);
+            float y = -corners[i].y + (HEIGHT * 0.5);
 
-            cornersCameraCoord[i] = cv::Point2f(x, y);
+            cornersCameraCoord[(i + 2)%4] = cv::Point2f(x, y);
         }
 
-        estimateSquarePose(transformation, (cv::Point2f *)cornersCameraCoord, 0.04346);
+        float mtrx[16];
+        estimateSquarePose(mtrx, (cv::Point2f *)cornersCameraCoord, 0.04346);
+
+        // Transpose -> columns to rows because of OpenGL representation on the GPU
+        float transposed[16];
+
+        for (int x = 0; x < 4; ++x)
+            for (int y = 0; y < 4; ++y)
+                transposed[x * 4 + y] = mtrx[y * 4 + x];
+
+        memcpy(glm::value_ptr(this->transformation), transposed, sizeof(transposed));
     }
 }

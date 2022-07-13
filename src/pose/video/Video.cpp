@@ -1,4 +1,5 @@
 #include "Video.h"
+#include <iostream>
 
 namespace pose
 {
@@ -6,6 +7,7 @@ namespace pose
     {
         capture = std::make_unique<cv::VideoCapture>(cameraIndex);
         capture->open(cameraIndex);
+        isWebcam = true;
     }
 
     Video::Video(const std::string &mediaDirectory, bool isLooped)
@@ -13,11 +15,24 @@ namespace pose
     {
         capture = std::make_unique<cv::VideoCapture>(mediaDirectory);
         capture->open(mediaDirectory);
+        isWebcam = false;
     }
 
-    bool Video::getFrame(Image *frame) const
+    bool Video::getFrame(Image *frame)
     {
         bool hasMoreFrames = capture->read(*frame);
+
+        static bool isFirstFrame = true;
+        if(isFirstFrame)
+        {
+            std::cout << "Video captured, width: " << frame->cols << " height: " << frame->rows << std::endl;
+            isFirstFrame = false;
+        }
+
+        if(isWebcam)
+        {
+            cv::resize(*frame, *frame, cv::Size(640,360));
+        }
 
         if (hasMoreFrames)
             return true;

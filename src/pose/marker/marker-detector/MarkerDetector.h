@@ -16,8 +16,7 @@ namespace pose
     public:
         const Vec<Marker>& getMarkersFromImage(Image &image);
 
-    private:
-        // processor
+    public:
         GrayScaleImageProcessor grayScaleIP;
         AdaptiveTHImageProcessor adaptiveTHIP;
         DetectContourVecImageProcessor detectContourVecIP;
@@ -26,6 +25,8 @@ namespace pose
         SubDivideContourVecProcessor subDivideCP;
         PreciseCornersContourVecProcessor preciseEdgesCP;
         DetectMarkersContourfVecProcessor detectMarkersCP;
+
+    private:
         ProcessorChain chain;
 
     private:

@@ -52,6 +52,7 @@ void Window::initialize()
     openGLContext = std::make_unique<OpenGLContext>(window);
     openGLContext->init();
     OpenGLAPI::init();
+    OpenGLAPI::setViewport(0,0,windowProps.width, windowProps.height);
 }
 
 void Window::initializeGLFW() const

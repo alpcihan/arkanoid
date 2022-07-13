@@ -13,6 +13,7 @@ namespace pose
         ~Window();
         
         void display(const Image& frame) const;
+        void createTrackbar(std::string name, int* value, int maxValue, void (*callback)(int,void*));
         
     private:
         std::string title;
