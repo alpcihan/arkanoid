@@ -29,4 +29,9 @@ namespace help
     {
         return RESOURCE_DIR + str;
     }
+
+    float rand()
+    {
+        return (((float) std::rand() / (RAND_MAX)) + 1);
+    }
 }

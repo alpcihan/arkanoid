@@ -54,14 +54,14 @@ namespace pose
  
         for (int i = 0; i < 4; i++)
         {
-            float x = corners[i].x - (WIDTH * 0.5);
-            float y = -corners[i].y + (HEIGHT * 0.5);
+            float x = corners[i].x - 320;
+            float y = -corners[i].y + 180;
 
             cornersCameraCoord[(i + 2)%4] = cv::Point2f(x, y);
         }
 
         float mtrx[16];
-        estimateSquarePose(mtrx, (cv::Point2f *)cornersCameraCoord, 0.04346);
+        estimateSquarePose(mtrx, (cv::Point2f *)cornersCameraCoord, MARKER_SIZE*1.5);
 
         // Transpose -> columns to rows because of OpenGL representation on the GPU
         float transposed[16];

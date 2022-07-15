@@ -22,7 +22,6 @@ namespace pose
     Image save;
     bool Video::getFrame(Image *frame, int idx)
     {   
-        /*
         // get frame with index
         static bool isFirst = true;
         if(idx >= 0)
@@ -40,8 +39,7 @@ namespace pose
             else *frame = save;
             return true;
         }
-        */
-       
+        
         bool hasMoreFrames = capture->read(*frame);
 
         static bool isFirstFrame = true;
@@ -53,7 +51,7 @@ namespace pose
 
         if(isWebcam)
         {
-            cv::resize(*frame, *frame, cv::Size(WIDTH,HEIGHT));
+            cv::resize(*frame, *frame, cv::Size(WIDTH/3.0f,HEIGHT/3.0f));
         }
 
         if (hasMoreFrames)

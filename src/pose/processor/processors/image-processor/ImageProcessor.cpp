@@ -1,6 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include "pose/types.h"
 #include "ImageProcessor.h"
+#include "config/config.h"
 
 namespace pose
 {
@@ -14,11 +15,11 @@ namespace pose
         cv::adaptiveThreshold(
             input,
             result,
-            params.maxIntensity,
-            params.type,
+            config::maxIntensity,
+            ATH_TYPE,
             cv::THRESH_BINARY,
-            params.blockSize,
-            params.constant);
+            config::blockSize,
+            config::athConst);
     }
 
     void DetectContourVecImageProcessor::process(const Image &input, ContourVec *output)

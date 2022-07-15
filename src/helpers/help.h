@@ -16,4 +16,6 @@ namespace help
 
     // get the path relative to the resources file
     std::string toResourcePath(std::string str);
+
+    float rand();
 }

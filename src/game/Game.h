@@ -7,14 +7,24 @@
 #define path(x) help::toResourcePath(x)
 
 namespace game
-{
+{   
+    struct GameState
+    {
+        public:
+        
+    };
+
     class Game
     {   
         public:
             // props
             std::shared_ptr<gfx::Texture> bgTexture;
             glm::mat4 extrinsicMat;
+            glm::mat4 extrinsicMatPlayer;
+            glm::mat4 extrinsicMatButton;
             bool isMarkerDetected = false;
+            bool isPlayerMarkerDetected = false;
+            bool isButtonMarkerDetected = false;
             
         public:
             Game() = default;
@@ -29,6 +39,9 @@ namespace game
             std::vector<std::shared_ptr<gfx::Cube>> walls;
             std::shared_ptr<gfx::Plane> background;
             std::vector<std::shared_ptr<gfx::Cube>> healthBar;
+            std::shared_ptr<gfx::Cube> controller;
+            std::shared_ptr<gfx::Cube> button;
+            std::shared_ptr<gfx::Cube> endScreen;
 
             // window
             std::unique_ptr<gfx::Window> window;
@@ -40,6 +53,7 @@ namespace game
             void onUpdate();
             void collisionUpdate();
             void draw();     
+            void replay();
     };
 
       

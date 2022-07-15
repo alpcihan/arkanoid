@@ -10,46 +10,55 @@ std::unique_ptr<pose::Video> video;
 std::unique_ptr<game::Game> arcanoid;
 pose::MarkerDetector markerDetector;
 
+cv::Mat imgGrayScale, imgAdaptive;
+int maxFocal = 1000;
+
 // debug
 #ifdef DEBUG_MODE
 pose::Window debugWindow;
-int maxFocal = 1000;
 #endif
 
-bool getMatrices(cv::Mat frame, glm::mat4 &extrinsicMat);
+void getMatrices(cv::Mat frame, glm::mat4 &extrinsicMat, glm::mat4 &extrinsicMatPlayer, glm::mat4 &extrinsicMatButton, bool &isMarkerDetected, bool &isPlayerMarkerDetected, bool &isButtonMarkerDetected);
 
+// callbacks
 void focalLengthCallback(int val, void *)
 {
 	config::focal = val;
 	std::cout << "Focal length: " << val << std::endl;
+}
+void intensityCallback(int val, void *)
+{
+	config::maxIntensity= val;
+	std::cout << "Max intensity: " << val << std::endl;
+}
+void blockSizeCallback(int val, void *)
+{
+	config::blockSize = val;
+	std::cout << "Block size: " << val << std::endl;
+}
+void athConstCallback(int val, void *)
+{
+	config::athConst = val;
+	std::cout << "Const: " << val << std::endl;
 }
 
 void onUpdate()
 {
 	// get the frame
 	pose::Image frame;
-	video->getFrame(&frame, 50);
+	video->getFrame(&frame);
 
-	// detect the markers
-	/*
-	const pose::Vec<pose::Marker> &markers = markerDetector.getMarkersFromImage(frame);
-	for(const auto& marker : markers)
-		if(marker.getCode() == 90)
-		{
-			arcanoid->extrinsicMat = marker.getTransformation();
-			help::printMat4(marker.getTransformation());
-		}
-	*/
-	
-	arcanoid->isMarkerDetected = getMatrices(frame, arcanoid->extrinsicMat);
+	arcanoid->isMarkerDetected = false, arcanoid->isPlayerMarkerDetected = false, arcanoid->isButtonMarkerDetected = false;
+	getMatrices(frame,
+				arcanoid->extrinsicMat, arcanoid->extrinsicMatPlayer, arcanoid->extrinsicMatButton,
+				arcanoid->isMarkerDetected, arcanoid->isPlayerMarkerDetected, arcanoid->isButtonMarkerDetected
+	);
 
 #ifdef DEBUG_MODE
-//pose::drawContourVec(markerDetector.subDivideCP.getLastResult(), &frame);
-//pose::drawPoints(markerDetector.preciseEdgesCP.getLastResult(), &frame);
-//debugWindow.display(markerDetector.adaptiveTHIP.getLastResult());
+	debugWindow.display(imgAdaptive);
 #endif
 
-	cv::waitKey(10);
+	cv::waitKey(FPS_DROP);
 	// set the game background image
 	arcanoid->bgTexture = help::getBGTexture(frame);
 }
@@ -58,10 +67,16 @@ int main()
 {
 #ifdef DEBUG_MODE
 	debugWindow.createTrackbar("Focal len", &config::focal, maxFocal, &focalLengthCallback);
+	debugWindow.createTrackbar("Max intensity", &config::maxIntensity, 255, &intensityCallback);
+	debugWindow.createTrackbar("Block size", &config::blockSize, 200, &blockSizeCallback);
+	debugWindow.createTrackbar("Const", &config::athConst, 70, &athConstCallback);
 #endif
 
 	// init the capture
-	video = std::make_unique<pose::Video>(path("marker.mp4"));
+	if (USE_WEBCAM)
+		video = std::make_unique<pose::Video>(0);
+	else
+		video = std::make_unique<pose::Video>(path("marker.mp4"));
 
 	// game
 	arcanoid = std::make_unique<game::Game>();
@@ -93,19 +108,8 @@ struct MyStrip
 };
 typedef vector<Point> contour_t;
 typedef vector<contour_t> contour_vector_t;
-const int threshold_slider_max = 255;
-int threshold_slider = 0;
-Mat videoStreamFrameGray;
-Mat videoStreamFrameOutput;
 int bw_thresh = 55;
-static void on_trackbar(int pos, void *slider_value)
-{
-	*((int *)slider_value) = pos;
-}
-void bw_trackbarHandler(int pos, void *slider_value)
-{
-	*((int *)slider_value) = pos;
-}
+
 int subpixSampleSafe(const Mat &pSrc, const Point2f &p)
 {
 	int fx = int(floorf(p.x));
@@ -140,15 +144,14 @@ Mat calculate_Stripe(double dx, double dy, MyStrip &st)
 	return Mat(stripeSize, CV_8UC1);
 }
 
-bool getMatrices(Mat frame, glm::mat4 &extrinsicMat)
+void getMatrices(Mat frame, glm::mat4 &extrinsicMat, glm::mat4 &extrinsicMatPlayer, glm::mat4 &extrinsicMatButton, bool &isMarkerDetected, bool &isPlayerMarkerDetected, bool &isButtonMarkerDetected)
 {
 	Mat imgFiltered;
-	Mat grayScale;
 	imgFiltered = frame.clone();
-	cvtColor(imgFiltered, grayScale, COLOR_BGR2GRAY);
-	threshold(grayScale, grayScale, 100, 255, THRESH_BINARY);
+	cvtColor(imgFiltered, imgGrayScale, COLOR_BGR2GRAY);
+	adaptiveThreshold(imgGrayScale, imgAdaptive, config::maxIntensity, ATH_TYPE, cv::THRESH_BINARY, config::blockSize, config::athConst);
 	contour_vector_t contours;
-	findContours(grayScale, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
+	findContours(imgAdaptive, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
 	for (size_t k = 0; k < contours.size(); k++)
 	{
 		contour_t approx_contour;
@@ -196,7 +199,7 @@ bool getMatrices(Mat frame, glm::mat4 &extrinsicMat)
 						Point p2;
 						p2.x = (int)subPixel.x;
 						p2.y = (int)subPixel.y;
-						int pixelIntensity = subpixSampleSafe(grayScale, subPixel);
+						int pixelIntensity = subpixSampleSafe(imgAdaptive, subPixel);
 						int w = m + 1;
 						int h = n + (strip.stripeLength >> 1);
 						imagePixelStripe.at<uchar>(h, w) = (uchar)pixelIntensity;
@@ -286,7 +289,7 @@ bool getMatrices(Mat frame, glm::mat4 &extrinsicMat)
 		Mat homographyMatrix(Size(3, 3), CV_32FC1);
 		homographyMatrix = getPerspectiveTransform(corners, targetCorners);
 		Mat imageMarker(Size(6, 6), CV_8UC1);
-		warpPerspective(grayScale, imageMarker, homographyMatrix, Size(6, 6));
+		warpPerspective(imgAdaptive, imageMarker, homographyMatrix, Size(6, 6));
 		threshold(imageMarker, imageMarker, bw_thresh, 255, CV_THRESH_BINARY);
 		int code = 0;
 		for (int i = 0; i < 6; ++i)
@@ -358,8 +361,9 @@ bool getMatrices(Mat frame, glm::mat4 &extrinsicMat)
 			corners[i].y = -corners[i].y + 180;
 		}
 		float resultMatrix[16];
-		pose::estimateSquarePose(resultMatrix, (Point2f *)corners, 0.04846);
-		if (code == 90)
+		pose::estimateSquarePose(resultMatrix, (Point2f *)corners, MARKER_SIZE * 2);
+
+		if (code == CODE_1)
 		{
 			float transposed[16];
 
@@ -368,10 +372,29 @@ bool getMatrices(Mat frame, glm::mat4 &extrinsicMat)
 					transposed[x * 4 + y] = resultMatrix[y * 4 + x];
 
 			memcpy(glm::value_ptr(extrinsicMat), transposed, sizeof(transposed));
-			return true;
+			isMarkerDetected = true;
+		}
+		else if (code == CODE_2)
+		{
+			float transposed[16];
+
+			for (int x = 0; x < 4; ++x)
+				for (int y = 0; y < 4; ++y)
+					transposed[x * 4 + y] = resultMatrix[y * 4 + x];
+
+			memcpy(glm::value_ptr(extrinsicMatPlayer), transposed, sizeof(transposed));
+			isPlayerMarkerDetected = true;
+		}
+		else if (code == CODE_3)
+		{
+			float transposed[16];
+
+			for (int x = 0; x < 4; ++x)
+				for (int y = 0; y < 4; ++y)
+					transposed[x * 4 + y] = resultMatrix[y * 4 + x];
+
+			memcpy(glm::value_ptr(extrinsicMatButton), transposed, sizeof(transposed));
+			isButtonMarkerDetected = true;
 		}
 	}
-
-	extrinsicMat = glm::mat4(1);
-	return false;
 }

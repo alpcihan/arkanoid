@@ -90,16 +90,6 @@ namespace game
                 // if intersects with the cube surface
                 if (glm::intersectRayPlane(orig, dir, planeOrig, planeNormal, distance))
                 {
-                    /*
-                    if (isOut &&
-                        !isCorner &&
-                        !isInsideAABB(((st + dir * distance)) - planeNormal * 0.0001f, minX, minY, minZ, maxX, maxY, maxZ))
-                    {
-                        isCorner = true;
-                        continue;
-                    }
-                    */
-
                     if (distance < minDist)
                     {
                         minDist = distance;
