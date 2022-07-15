@@ -1,17 +1,20 @@
 #pragma once
 
-#include "utils/utils.h"
+#include "helpers/help.h"
 #include "graphics/gfx.h"
-#define path(x) path::resource(x)
+#include "config/config.h"
+#include "game-objects/game-objects.h"
+#define path(x) help::toResourcePath(x)
 
-namespace arcanoid
+namespace game
 {
     class Game
     {   
         public:
             // props
             std::shared_ptr<gfx::Texture> bgTexture;
-            glm::mat4 transformation;
+            glm::mat4 extrinsicMat;
+            bool isMarkerDetected = false;
             
         public:
             Game() = default;
@@ -20,9 +23,12 @@ namespace arcanoid
 
         private:
             // scene
-            std::shared_ptr<gfx::Cube> player;
+            Player player;
+            Ball ball;
+            std::vector<Brick> bricks;
+            std::vector<std::shared_ptr<gfx::Cube>> walls;
             std::shared_ptr<gfx::Plane> background;
-            std::vector<std::shared_ptr<gfx::Object3D>> bricks;
+            std::vector<std::shared_ptr<gfx::Cube>> healthBar;
 
             // window
             std::unique_ptr<gfx::Window> window;
@@ -32,5 +38,9 @@ namespace arcanoid
         
         private:
             void onUpdate();
+            void collisionUpdate();
+            void draw();     
     };
+
+      
 }

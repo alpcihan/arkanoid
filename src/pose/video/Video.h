@@ -11,7 +11,7 @@ namespace pose
         Video(int cameraIndex);
         Video(const std::string &mediaDirectory, bool isLooped = true);
 
-        bool getFrame(Image* frame);
+        bool getFrame(Image* frame, int idx = -1);
         
     private:
         std::unique_ptr<cv::VideoCapture> capture;

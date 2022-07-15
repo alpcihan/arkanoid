@@ -7,7 +7,8 @@
 #include <algorithm>
 #include <iostream>
 #include "pose-estimation.h"
-#include "utils/utils.h"
+#include "helpers/help.h"
+#include "config/config.h"
 
 using namespace std;
 
@@ -579,7 +580,7 @@ namespace pose
 		// approximate focal length for logitech quickcam 4000 at 320*240 resolution
 
 		// approx for laptop internal camera with resolution 640x480
-		const float fFocalLength = global::focal;
+		const float fFocalLength = config::focal;
 
 		// compute initial pose
 		float rot[4], trans[3];

@@ -10,7 +10,7 @@ namespace pose
     }
 
     void AdaptiveTHImageProcessor::process(const Image &input, Image *output)
-    {
+    {   
         cv::adaptiveThreshold(
             input,
             result,

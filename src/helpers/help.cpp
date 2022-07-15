@@ -1,4 +1,4 @@
-#include "helpers.h"
+#include "help.h"
 
 namespace help
 {
@@ -23,5 +23,10 @@ namespace help
         }
 
         std::cout << std::endl;
+    }
+
+    std::string toResourcePath(std::string str)
+    {
+        return RESOURCE_DIR + str;
     }
 }

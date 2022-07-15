@@ -28,7 +28,7 @@ namespace gfx
         void update() const;
         void clear() const;
         bool isClosed() const;
-        const GLFWwindow *getGLFWwindow() const;
+        GLFWwindow *getGLFWwindow() const;
 
     private:
         GLFWwindow *window;

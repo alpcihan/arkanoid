@@ -11,3 +11,4 @@
 #include "graphics/object-3d/Object3D.h"
 #include "graphics/object-3d/shapes/Cube.h"
 #include "graphics/object-3d/shapes/Plane.h"
+#include "graphics/object-3d/shapes/Sphere.h"

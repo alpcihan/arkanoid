@@ -1,4 +1,5 @@
 #include "Video.h"
+#include "config/config.h"
 #include <iostream>
 
 namespace pose
@@ -18,8 +19,29 @@ namespace pose
         isWebcam = false;
     }
 
-    bool Video::getFrame(Image *frame)
-    {
+    Image save;
+    bool Video::getFrame(Image *frame, int idx)
+    {   
+        /*
+        // get frame with index
+        static bool isFirst = true;
+        if(idx >= 0)
+        {
+            if(isFirst)
+            {
+                for(int i = 0; i < idx; i++)
+                {
+                    capture->set(cv::CAP_PROP_POS_FRAMES, 0);
+                    capture->read(*frame);
+                }
+                save = *frame;
+                isFirst = false;
+            }
+            else *frame = save;
+            return true;
+        }
+        */
+       
         bool hasMoreFrames = capture->read(*frame);
 
         static bool isFirstFrame = true;
@@ -31,7 +53,7 @@ namespace pose
 
         if(isWebcam)
         {
-            cv::resize(*frame, *frame, cv::Size(640,360));
+            cv::resize(*frame, *frame, cv::Size(WIDTH,HEIGHT));
         }
 
         if (hasMoreFrames)
