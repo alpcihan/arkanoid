@@ -8,11 +8,6 @@
 
 namespace game
 {   
-    struct GameState
-    {
-        public:
-        
-    };
 
     class Game
     {   

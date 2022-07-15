@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(ar-arcanoid)
+project(ar-arkanoid)
 
 set (CMAKE_CXX_STANDARD 20)
 configure_file(./src/config/directories.h.in config/directories.h)

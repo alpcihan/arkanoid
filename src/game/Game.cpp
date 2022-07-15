@@ -28,7 +28,7 @@ namespace game
         this->callback = callback;
 
         // init window + opengl
-        window = std::make_unique<gfx::Window>(gfx::WindowProps(WIDTH, HEIGHT));
+        window = std::make_unique<gfx::Window>(gfx::WindowProps(WIDTH, HEIGHT, "arkanoid"));
 
         // set shared shaders and textures
         shader = std::make_shared<gfx::Shader>(path("shader/default.shader"));
@@ -365,7 +365,6 @@ namespace game
         mvp = vpScene * walls[idx2]->getTransform();
         walls[idx2]->shader->setMat4("u_mvp", mvp);
         walls[idx2]->draw();
-
 
         // health bar
         for (int i = 0; i < player.life; i++)

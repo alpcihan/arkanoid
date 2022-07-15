@@ -7,7 +7,7 @@
 #define path(x) help::toResourcePath(x)
 
 std::unique_ptr<pose::Video> video;
-std::unique_ptr<game::Game> arcanoid;
+std::unique_ptr<game::Game> arkanoid;
 pose::MarkerDetector markerDetector;
 
 cv::Mat imgGrayScale, imgAdaptive;
@@ -15,7 +15,7 @@ int maxFocal = 1000;
 
 // debug
 #ifdef DEBUG_MODE
-pose::Window debugWindow;
+pose::Window parameterWindow;
 #endif
 
 void getMatrices(cv::Mat frame, glm::mat4 &extrinsicMat, glm::mat4 &extrinsicMatPlayer, glm::mat4 &extrinsicMatButton, bool &isMarkerDetected, bool &isPlayerMarkerDetected, bool &isButtonMarkerDetected);
@@ -48,28 +48,28 @@ void onUpdate()
 	pose::Image frame;
 	video->getFrame(&frame);
 
-	arcanoid->isMarkerDetected = false, arcanoid->isPlayerMarkerDetected = false, arcanoid->isButtonMarkerDetected = false;
+	arkanoid->isMarkerDetected = false, arkanoid->isPlayerMarkerDetected = false, arkanoid->isButtonMarkerDetected = false;
 	getMatrices(frame,
-				arcanoid->extrinsicMat, arcanoid->extrinsicMatPlayer, arcanoid->extrinsicMatButton,
-				arcanoid->isMarkerDetected, arcanoid->isPlayerMarkerDetected, arcanoid->isButtonMarkerDetected
+				arkanoid->extrinsicMat, arkanoid->extrinsicMatPlayer, arkanoid->extrinsicMatButton,
+				arkanoid->isMarkerDetected, arkanoid->isPlayerMarkerDetected, arkanoid->isButtonMarkerDetected
 	);
 
 #ifdef DEBUG_MODE
-	debugWindow.display(imgAdaptive);
+	parameterWindow.display(imgAdaptive);
 #endif
 
 	cv::waitKey(FPS_DROP);
 	// set the game background image
-	arcanoid->bgTexture = help::getBGTexture(frame);
+	arkanoid->bgTexture = help::getBGTexture(frame);
 }
 
 int main()
 {
 #ifdef DEBUG_MODE
-	debugWindow.createTrackbar("Focal len", &config::focal, maxFocal, &focalLengthCallback);
-	debugWindow.createTrackbar("Max intensity", &config::maxIntensity, 255, &intensityCallback);
-	debugWindow.createTrackbar("Block size", &config::blockSize, 200, &blockSizeCallback);
-	debugWindow.createTrackbar("Const", &config::athConst, 70, &athConstCallback);
+	parameterWindow.createTrackbar("Focal len", &config::focal, maxFocal, &focalLengthCallback);
+	parameterWindow.createTrackbar("Max intensity", &config::maxIntensity, 255, &intensityCallback);
+	parameterWindow.createTrackbar("Block size", &config::blockSize, 200, &blockSizeCallback);
+	parameterWindow.createTrackbar("Const", &config::athConst, 70, &athConstCallback);
 #endif
 
 	// init the capture
@@ -79,9 +79,9 @@ int main()
 		video = std::make_unique<pose::Video>(path("marker.mp4"));
 
 	// game
-	arcanoid = std::make_unique<game::Game>();
-	arcanoid->init(&onUpdate);
-	arcanoid->run();
+	arkanoid = std::make_unique<game::Game>();
+	arkanoid->init(&onUpdate);
+	arkanoid->run();
 
 	return 0;
 }
