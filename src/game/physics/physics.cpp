@@ -15,7 +15,7 @@ namespace game
         const gfx::Sphere &sphere,
         const gfx::Cube &cube,
         const glm::vec3 &previousT,
-        glm::vec3 &hitPoint,
+        glm::vec3 &newPoint,
         glm::vec3 &normal)
     {
         glm::vec3 st = sphere.translation;
@@ -68,23 +68,17 @@ namespace game
         // if there is collision
         if (distance < radius)
         {
-            bool isOut = true;
-            // if sphere center is inside the cube
-            if (isInsideAABB(st, minX, minY, minZ, maxX, maxY, maxZ))
-            {
-                isOut = false;
-            }
-
             float minDist = FLT_MAX;
-            glm::vec3 normTemp;
-            bool isCorner = false;
+            glm::vec3 minNorm;
+            glm::vec3 minDir;
 
             for (int i = 0; i < 6; i++)
             {
                 const glm::vec3 planeOrig = cubeSurfaceCenters[i];
                 const glm::vec3 planeNormal = glm::normalize(planeOrig - ct);
-                const glm::vec3 orig = st;
-                const glm::vec3 dir = glm::normalize(isOut ? orig - previousT : previousT - orig);
+                const glm::vec3 orig = st - planeNormal*ss.x;
+                const glm::vec3 prev = previousT - planeNormal*ss.x;
+                const glm::vec3 dir = glm::normalize(prev-orig);
                 float distance = 0;
 
                 // if intersects with the cube surface
@@ -93,12 +87,17 @@ namespace game
                     if (distance < minDist)
                     {
                         minDist = distance;
-                        normTemp = planeNormal;
+                        minNorm = planeNormal;
+                        minDir = dir;
                     }
                 }
             }
-            hitPoint = st + glm::normalize(isOut ? st - previousT : previousT - st) * minDist;
-            normal = normTemp;
+            glm::vec3 hitPoint = (st - minNorm*ss.x) + glm::normalize(minDir) * minDist;
+            glm::vec3 dir = glm::reflect(-minDir, minNorm);
+
+            newPoint = hitPoint + dir*minDist + minNorm*ss.x;
+            normal = minNorm;
+            
             return true;
         }
 

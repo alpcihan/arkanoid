@@ -11,6 +11,6 @@ namespace game
         const gfx::Sphere &sphere,
         const gfx::Cube &cube,
         const glm::vec3 &previousT,
-        glm::vec3 &hitPoint,
+        glm::vec3 &newPoint,
         glm::vec3 &normal);
 }

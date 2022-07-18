@@ -9,7 +9,6 @@ Video: https://youtu.be/__8tg8aaAow
 ## Table of Contents
 
 * [Getting Started](#getting-started)
-* [TODO](#todo)
 * [License](#license)
 
 ## Getting Started
@@ -45,10 +44,6 @@ Video: https://youtu.be/__8tg8aaAow
   `Focal length` is the field of view value of the projection matrix to calibrate the camera. 
   
 - To control the parameters define, ```#define PARAMETER_MODE``` at [config.h](./src/config/config.h).
-
-## TODO
-* Sort the walls with respect to their distance to the camera and make the closest 3 walls transparent (instead of 2) to not block the camera view
-* Fix the collision bugs
 
 ## Contact
 

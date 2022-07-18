@@ -32,6 +32,6 @@ namespace help
 
     float rand()
     {
-        return (((float) std::rand() / (RAND_MAX)) + 1);
+        return (((float) std::rand() / (RAND_MAX)));
     }
 }

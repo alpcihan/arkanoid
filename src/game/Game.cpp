@@ -74,7 +74,7 @@ namespace game
                     brick.obj->shader->setFloat("u_alpha", 0.2);
 
                     brick.obj->scale = glm::vec3(BRICK_SCALE);
-                    brick.obj->translation = glm::vec3(BRICK_SCALE * x, BRICK_SCALE * y, -0.05 - BRICK_SCALE * z);
+                    brick.obj->translation = glm::vec3(BRICK_SCALE * x, BRICK_SCALE * y, -0.045 - BRICK_SCALE * z);
 
                     bricks.push_back(brick);
                 }
@@ -167,25 +167,30 @@ namespace game
         // get movement delta (x,y) from the controller marker
         float threshold = 0.001;
 
-        auto prevV = glm::vec2(
-            extrinsicMatPlayer[3][0] - extrinsicMat[3][0],
-            extrinsicMatPlayer[3][1] - extrinsicMat[3][1]);
+        auto prevV = glm::vec2(extrinsicMatPlayer[3][0], extrinsicMatPlayer[3][1]);
         auto currentV = glm::vec2(prevMat[3][0], prevMat[3][1]);
 
-        glm::vec2 playerVelocity = currentV - prevV;
+        glm::vec2 playerVelocity = (currentV - prevV) * PLAYER_SPEED_CONST;
 
         // update the player pos by delta
         if ((frameCount > 1) &&
             (glm::distance(currentV, prevV) > threshold) &&
             (prevIsPlayerMarkerDetected && isPlayerMarkerDetected))
         {
+            float y = -playerVelocity.y;
+            float x = -playerVelocity.x;
+
+            // move the player within the borders
             auto newTrans = player.obj->translation + glm::vec3(-playerVelocity.y, -playerVelocity.x, 0);
+            auto th = (WALL_LENGHT-PLAYER_SIZE)*0.5f;
+            newTrans.y = std::max(-th, std::min(th, newTrans.y)); 
+            newTrans.x = std::max(-th, std::min(th, newTrans.x)); 
             player.obj->translation = newTrans;
         }
         // set the previous states
         if (frameCount > 1)
         {
-            prevMat = extrinsicMatPlayer - extrinsicMat;
+            prevMat = extrinsicMatPlayer;
             prevIsPlayerMarkerDetected = isPlayerMarkerDetected;
         }
 
@@ -201,20 +206,25 @@ namespace game
         {
             if (player.life <= 0)
             {
+                score = 0;
                 replay();
             }
             else
             {
                 isBallMoved = true;
                 button->texture = disableTex;
-                static int a = 0;
-                glm::vec2 vec = a % 2 == 0 ? glm::vec2(0, -0.003) : glm::vec2(-0.003, 0);
-                a++;
-                ball.velocity = glm::vec3(vec.x, vec.y, -0.002);
+                auto rndm = help::rand(); // [0, 1]
+                float sign1 = help::rand() > 0.5 ? -1 : 1;
+                float sign2 = help::rand() > 0.5 ? -1 : 1;
+                float v1 = rndm*BALL_SPEED * sign1;
+                float v2 = (1-rndm)*BALL_SPEED * sign2;
+                ball.velocity = glm::vec3(v1, v2, -BALL_SPEED);
                 buttonPressCount = 0;
             }
         }
 
+        if(isBallMoved)
+            ball.velocity = glm::normalize(ball.velocity) * BALL_SPEED;
         ball.move(ball.velocity);
 
         // check the game state
@@ -246,13 +256,13 @@ namespace game
 
     void Game::collisionUpdate()
     {
-        glm::vec3 normal, hitPoint;
+        glm::vec3 newPoint, normal;
 
         // player-ball
-        if (sphereAABBCollision(*ball.obj, *player.obj, ball.previousPos, hitPoint, normal))
+        if (sphereAABBCollision(*ball.obj, *player.obj, ball.previousPos, newPoint, normal))
         {
             glm::vec3 reflected = glm::reflect(ball.velocity, normal);
-            ball.obj->translation = ball.obj->translation + glm::normalize(reflected) * glm::distance(ball.obj->translation, ball.previousPos); // move to stop the collision
+            ball.setPos(newPoint); // move to stop the collision
             ball.velocity = reflected;
             return;
         }
@@ -261,10 +271,10 @@ namespace game
         for (int i = 0; i < bricks.size(); i++)
         {
             auto &brick = bricks[i];
-            if (sphereAABBCollision(*ball.obj, *brick.obj, ball.previousPos, hitPoint, normal))
+            if (sphereAABBCollision(*ball.obj, *brick.obj, ball.previousPos, newPoint, normal))
             {
                 glm::vec3 reflected = glm::reflect(ball.velocity, normal);
-                ball.obj->translation = ball.obj->translation + glm::normalize(reflected) * glm::distance(ball.obj->translation, ball.previousPos); // move to stop the collision
+                ball.setPos(newPoint); // move to stop the collision
                 ball.velocity = reflected;
 
                 // brick health update
@@ -279,10 +289,10 @@ namespace game
         // walls-ball
         for (auto &wall : walls)
         {
-            if (sphereAABBCollision(*ball.obj, *wall, ball.previousPos, hitPoint, normal))
+            if (sphereAABBCollision(*ball.obj, *wall, ball.previousPos, newPoint, normal))
             {
                 glm::vec3 reflected = glm::reflect(ball.velocity, normal);
-                ball.obj->translation = ball.obj->translation + glm::normalize(reflected) * glm::distance(ball.obj->translation, ball.previousPos); // move to stop the collision
+                ball.setPos(newPoint); // move to stop the collision
                 ball.velocity = reflected;
                 return;
             }

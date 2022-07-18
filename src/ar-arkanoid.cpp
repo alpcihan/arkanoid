@@ -14,7 +14,7 @@ cv::Mat imgGrayScale, imgAdaptive;
 int maxFocal = 1000;
 
 // debug
-#ifdef DEBUG_MODE
+#ifdef PARAMETER_MODE
 pose::Window parameterWindow;
 #endif
 
@@ -54,7 +54,7 @@ void onUpdate()
 				arkanoid->isMarkerDetected, arkanoid->isPlayerMarkerDetected, arkanoid->isButtonMarkerDetected
 	);
 
-#ifdef DEBUG_MODE
+#ifdef PARAMETER_MODE
 	parameterWindow.display(imgAdaptive);
 #endif
 
@@ -65,7 +65,7 @@ void onUpdate()
 
 int main()
 {
-#ifdef DEBUG_MODE
+#ifdef PARAMETER_MODE
 	parameterWindow.createTrackbar("Focal len", &config::focal, maxFocal, &focalLengthCallback);
 	parameterWindow.createTrackbar("Max intensity", &config::maxIntensity, 255, &intensityCallback);
 	parameterWindow.createTrackbar("Block size", &config::blockSize, 200, &blockSizeCallback);
