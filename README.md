@@ -56,4 +56,4 @@ alpcihan.ac@gmail.com
 
 ## License
 
-[Apache License Version 2.0](./LICENSE)
+[MIT](./LICENSE)
