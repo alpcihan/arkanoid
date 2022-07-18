@@ -127,8 +127,8 @@ namespace game
 
         // end screen
         endScreen = std::make_shared<gfx::Cube>(
-                std::make_shared<gfx::Texture>(path("texture/game-over.jpg")),
-                std::make_shared<gfx::Shader>(path("shader/life.shader")));
+            std::make_shared<gfx::Texture>(path("texture/game-over.jpg")),
+            std::make_shared<gfx::Shader>(path("shader/life.shader")));
         endScreen->translation = glm::vec3(0.0, 0.0, -0.9999);
         endScreen->scale = glm::vec3(0.8 * (HEIGHT / (float)WIDTH), 0.8, 0.000001);
 
@@ -166,11 +166,15 @@ namespace game
 
         // get movement delta (x,y) from the controller marker
         float threshold = 0.001;
-        auto prevV = glm::vec2(extrinsicMatPlayer[3][0], extrinsicMatPlayer[3][1]);
+
+        auto prevV = glm::vec2(
+            extrinsicMatPlayer[3][0] - extrinsicMat[3][0],
+            extrinsicMatPlayer[3][1] - extrinsicMat[3][1]);
         auto currentV = glm::vec2(prevMat[3][0], prevMat[3][1]);
+
         glm::vec2 playerVelocity = currentV - prevV;
 
-        // update the player pos by delta 
+        // update the player pos by delta
         if ((frameCount > 1) &&
             (glm::distance(currentV, prevV) > threshold) &&
             (prevIsPlayerMarkerDetected && isPlayerMarkerDetected))
@@ -181,7 +185,7 @@ namespace game
         // set the previous states
         if (frameCount > 1)
         {
-            prevMat = extrinsicMatPlayer;
+            prevMat = extrinsicMatPlayer - extrinsicMat;
             prevIsPlayerMarkerDetected = isPlayerMarkerDetected;
         }
 
@@ -189,7 +193,7 @@ namespace game
         if (!isBallMoved)
         {
             ball.obj->translation = glm::vec3(player.obj->translation.x, player.obj->translation.y, -FLOOR_OFFSET - ball.obj->scale.x - 0.001f);
-            // increase the press duration if the button is pressed 
+            // increase the press duration if the button is pressed
             if (!isButtonMarkerDetected && isMarkerDetected)
                 buttonPressCount++;
         }
@@ -265,8 +269,8 @@ namespace game
 
                 // brick health update
                 brick.health--;
-                brick.obj->shader->setFloat("u_alpha", 1.0 - 0.4*brick.health);
-                if(brick.health==0)
+                brick.obj->shader->setFloat("u_alpha", 1.0 - 0.4 * brick.health);
+                if (brick.health == 0)
                     bricks.erase(bricks.begin() + i);
                 return;
             }
@@ -312,59 +316,46 @@ namespace game
         ball.obj->draw();
 
         // bricks
-        for (auto &brick : bricks)
+        auto& bricks = this->bricks;
+        auto drawBricks = [&bricks, &vpScene]()
         {
-            auto mvp = vpScene * brick.obj->getTransform();
-            brick.obj->shader->setMat4("u_mvp", mvp);
-            brick.obj->draw();
-        }
+            for (auto &brick : bricks)
+            {
+                auto mvp = vpScene * brick.obj->getTransform();
+                brick.obj->shader->setMat4("u_mvp", mvp);
+                brick.obj->draw();
+            }
+        };
 
         // walls
-        float minDist1 = FLT_MAX, minDist2 = FLT_MAX;
-        int idx1, idx2;
-        for (int j = 0; j < 2; j++)
+        // sort the walls with respect to their distance to the camera
+        auto inversed = glm::inverse(extrinsicMat);
+        glm::vec3 camPos = glm::vec3(inversed[3][0], inversed[3][1], inversed[3][2]);
+        std::sort(walls.begin(), walls.end(), [&camPos](std::shared_ptr<gfx::Cube> a, std::shared_ptr<gfx::Cube> b)
         {
-            for (int i = 0; i < 5; i++)
+            auto distanceA = glm::distance(camPos, a->translation);
+            auto distanceB = glm::distance(camPos, b->translation);
+            return distanceA > distanceB; 
+        });
+
+        // render the walls and the bricks
+        auto size = walls.size();
+        for (int i = 0; i < size; i++)
+        {
+            auto &wall = walls[i];
+            
+            if (i > size - 4)
+                wall->shader->setFloat("u_alpha", 0.2f);
+            else
             {
-                if (j == 1 && i == idx1)
-                    continue;
-
-                auto wall = walls[i];
-                if (j == 1)
-                    wall->shader->setFloat("u_alpha", 1.0f);
-                glm::vec3 cam = glm::vec3(glm::inverse(extrinsicMat)[3][0], glm::inverse(extrinsicMat)[3][1], glm::inverse(extrinsicMat)[3][2]);
-                float dist = glm::distance(cam, wall->translation);
-                if (j == 0 && dist < minDist1)
-                {
-                    minDist1 = dist;
-                    idx1 = i;
-                }
-                else if (j == 1 && dist < minDist2)
-                {
-                    minDist2 = dist;
-                    idx2 = i;
-                }
+                if (i == size - 4) drawBricks(); 
+                wall->shader->setFloat("u_alpha", 1.0f);
             }
-        }
-
-        walls[idx1]->shader->setFloat("u_alpha", 0.2f);
-        walls[idx2]->shader->setFloat("u_alpha", 0.2f);
-
-        for (int i = 0; i < walls.size(); i++)
-        {   
-            if(i == idx1 || i == idx2)
-                continue;
-            auto& wall = walls[i];
+               
             auto mvp = vpScene * wall->getTransform();
             wall->shader->setMat4("u_mvp", mvp);
             wall->draw();
         }
-        mvp = vpScene * walls[idx1]->getTransform();
-        walls[idx1]->shader->setMat4("u_mvp", mvp);
-        walls[idx1]->draw();
-        mvp = vpScene * walls[idx2]->getTransform();
-        walls[idx2]->shader->setMat4("u_mvp", mvp);
-        walls[idx2]->draw();
 
         // health bar
         for (int i = 0; i < player.life; i++)
@@ -389,10 +380,12 @@ namespace game
         }
 
         // end screen
-        if(isGameOver)
+        if (isGameOver)
         {
-            if(won) endScreen->texture = winTex;
-            else endScreen->texture = gameOverTex;
+            if (won)
+                endScreen->texture = winTex;
+            else
+                endScreen->texture = gameOverTex;
 
             auto model = endScreen->getTransform();
             endScreen->shader->setMat4("u_model", model);
