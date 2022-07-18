@@ -37,6 +37,7 @@ namespace game
             std::shared_ptr<gfx::Cube> controller;
             std::shared_ptr<gfx::Cube> button;
             std::shared_ptr<gfx::Cube> endScreen;
+            std::vector<std::shared_ptr<gfx::Cube>> scoreBoard;
 
             // window
             std::unique_ptr<gfx::Window> window;

@@ -9,6 +9,7 @@ bool isGameOver = false;
 bool isBallMoved = false;
 int frameCount = 0;
 int buttonPressCount = 0;
+unsigned int score = 0;
 
 glm::mat4 prevMat = glm::mat4(0);
 bool prevIsPlayerMarkerDetected = false;
@@ -21,6 +22,7 @@ namespace game
     std::shared_ptr<gfx::Texture> replayTex;
     std::shared_ptr<gfx::Texture> winTex;
     std::shared_ptr<gfx::Texture> gameOverTex;
+    std::vector<std::shared_ptr<gfx::Texture>> digitsTex;
 
     void Game::init(void (*callback)())
     {
@@ -37,6 +39,11 @@ namespace game
         replayTex = std::make_shared<gfx::Texture>(path("texture/button-replay.jpg"));
         winTex = std::make_shared<gfx::Texture>(path("texture/win.png"));
         gameOverTex = std::make_shared<gfx::Texture>(path("texture/game-over.jpg"));
+        for(int i = 0; i < 10; i++)
+        {
+            auto pth = "texture/digits/" + std::to_string(i) + ".jpg";
+            digitsTex.push_back(std::make_shared<gfx::Texture>(path(pth)));
+        }
 
         // player
         player.obj = std::make_shared<gfx::Cube>(
@@ -118,6 +125,17 @@ namespace game
             healthBar.push_back(life);
         }
 
+        // scoreboard
+        for (int i = 0; i < 3; i++)
+        {
+            auto score = std::make_shared<gfx::Cube>(
+                std::make_shared<gfx::Texture>(path("texture/digits/0.jpg")),
+                std::make_shared<gfx::Shader>(path("shader/score.shader")));
+            score->translation = glm::vec3(-0.1 + i * 0.05, 0.8, -0.9999);
+            score->scale = glm::vec3(0.1 * (HEIGHT / (float)WIDTH), 0.1, 0.000001);
+            scoreBoard.push_back(score);
+        }
+
         // controller
         controller = std::make_shared<gfx::Cube>(
             std::make_shared<gfx::Texture>(path("texture/move.jpg")),
@@ -165,7 +183,7 @@ namespace game
             buttonPressCount = 0;
 
         // get movement delta (x,y) from the controller marker
-        float threshold = 0.001;
+        float threshold = 0.0015;
 
         auto prevV = glm::vec2(extrinsicMatPlayer[3][0], extrinsicMatPlayer[3][1]);
         auto currentV = glm::vec2(prevMat[3][0], prevMat[3][1]);
@@ -273,6 +291,7 @@ namespace game
             auto &brick = bricks[i];
             if (sphereAABBCollision(*ball.obj, *brick.obj, ball.previousPos, newPoint, normal))
             {
+                score++;
                 glm::vec3 reflected = glm::reflect(ball.velocity, normal);
                 ball.setPos(newPoint); // move to stop the collision
                 ball.velocity = reflected;
@@ -374,6 +393,20 @@ namespace game
             auto model = life->getTransform();
             life->shader->setMat4("u_model", model);
             life->draw();
+        }
+
+        // scoreboard
+        for (int i = 0; i < scoreBoard.size(); i++)
+        {
+            int j = scoreBoard.size()-1-i;
+            
+            int digit = (score % (int)std::pow(10, j+1)) / (int)std::pow(10, j);
+            
+            auto& scr = scoreBoard[i];
+            scr->texture = digitsTex[digit];
+            auto model = scr->getTransform();
+            scr->shader->setMat4("u_model", model);
+            scr->draw();
         }
 
         // controller
