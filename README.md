@@ -1,10 +1,10 @@
 # ar-arkanoid
 
-<img width="680" alt="task3_task7_PNG" src="https://user-images.githubusercontent.com/37274614/179298434-02b56a55-1340-4f03-b65f-9db5c14db26b.png">
+<img width="680" alt="task3_task7_PNG" src="https://user-images.githubusercontent.com/37274614/179810967-151b7dd1-6f5a-4313-be69-b0b84df71504.png">
 
 Marker-based AR implementation of the nostalgic [Arkanoid](https://en.wikipedia.org/wiki/Arkanoid) game with OpenGL, OpenCV and C++.
 
-Video: https://youtu.be/__8tg8aaAow
+Video: https://youtu.be/FkXOo16MfIE
 
 ## Table of Contents
 
