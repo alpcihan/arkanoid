@@ -15,7 +15,7 @@ Video: https://youtu.be/FkXOo16MfIE
 ### Download
 - Clone the repository recursively `git clone --recursive https://github.com/alpcihan/ar-arcanoid`
 - Use `git submodule update --init` if the repository was cloned without the submodules previously.
-- The project automatically builds the third-party libraries except for OpenCV. 
+- The project automatically builds the third-party libraries, except OpenCV. 
 
   To set up the OpenCV:
   
