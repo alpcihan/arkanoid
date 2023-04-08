@@ -99,19 +99,19 @@ namespace game
         }
 
         // front right -up
-        walls[0]->scale = glm::vec3(WALL_WIDTH, WALL_LENGHT, WALL_HEIGHT);
+        walls[0]->scale = glm::vec3(WALL_WIDTH, WALL_LENGTH, WALL_HEIGHT);
         walls[0]->translation = glm::vec3(-0.5 * (WALL_HEIGHT + WALL_WIDTH), 0.0, -0.5 * (WALL_HEIGHT + WALL_WIDTH));
 
-        walls[1]->scale = glm::vec3(WALL_WIDTH, WALL_LENGHT, WALL_HEIGHT);
+        walls[1]->scale = glm::vec3(WALL_WIDTH, WALL_LENGTH, WALL_HEIGHT);
         walls[1]->translation = glm::vec3(0.5 * (WALL_HEIGHT + WALL_WIDTH), 0.0, -0.5 * (WALL_HEIGHT + WALL_WIDTH));
 
-        walls[2]->scale = glm::vec3(WALL_LENGHT, WALL_WIDTH, WALL_HEIGHT);
+        walls[2]->scale = glm::vec3(WALL_LENGTH, WALL_WIDTH, WALL_HEIGHT);
         walls[2]->translation = glm::vec3(0.0, 0.5 * (WALL_HEIGHT + WALL_WIDTH), -0.5 * (WALL_HEIGHT + WALL_WIDTH));
 
-        walls[3]->scale = glm::vec3(WALL_LENGHT, WALL_WIDTH, WALL_HEIGHT);
+        walls[3]->scale = glm::vec3(WALL_LENGTH, WALL_WIDTH, WALL_HEIGHT);
         walls[3]->translation = glm::vec3(0.0, -0.5 * (WALL_HEIGHT + WALL_WIDTH), -0.5 * (WALL_HEIGHT + WALL_WIDTH));
 
-        walls[4]->scale = glm::vec3(WALL_LENGHT, WALL_LENGHT, WALL_WIDTH);
+        walls[4]->scale = glm::vec3(WALL_LENGTH, WALL_LENGTH, WALL_WIDTH);
         walls[4]->translation = glm::vec3(0.0, 0.0, -(WALL_HEIGHT + WALL_WIDTH));
 
         // health bar
@@ -200,7 +200,7 @@ namespace game
 
             // move the player within the borders
             auto newTrans = player.obj->translation + glm::vec3(-playerVelocity.y, -playerVelocity.x, 0);
-            auto th = (WALL_LENGHT-PLAYER_SIZE)*0.5f;
+            auto th = (WALL_LENGTH-PLAYER_SIZE)*0.5f;
             newTrans.y = std::max(-th, std::min(th, newTrans.y)); 
             newTrans.x = std::max(-th, std::min(th, newTrans.x)); 
             player.obj->translation = newTrans;
