@@ -1,6 +1,7 @@
 #pragma once
 
 #include <opencv/cv.h>
+#include <glm/glm.hpp>
 
 namespace pose
 {
@@ -22,5 +23,7 @@ void estimateSquarePose(float* result, const cv::Point2f* p2D_, float markerSize
 * @param quadrangle the coordinates of the corners counter-clockwise
 */
 void calcHomography(float* pResult, const CvPoint2D32f* pQuad);
+
+void getMatrices(Mat frame, glm::mat4 &extrinsicMat, glm::mat4 &extrinsicMatPlayer, glm::mat4 &extrinsicMatButton, bool &isMarkerDetected, bool &isPlayerMarkerDetected, bool &isButtonMarkerDetected)
 
 }

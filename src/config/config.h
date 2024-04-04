@@ -6,6 +6,9 @@
 #define USE_WEBCAM 1 // 1: use webcam | 0: use resourcers/marker.mp4 (pre-recorded game scene video)
 #define FPS_DROP 10 // delay per frame in ms
 
+/* input settings */
+#define INPUT_VIDEO "marker.mp4"
+
 /* marker settings */
 #define MARKER_SIZE 0.04846 // scale of the markers
 #define CODE_1 90 // Scene marker

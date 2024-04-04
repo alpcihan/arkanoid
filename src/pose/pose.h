@@ -12,6 +12,8 @@
 
 #include "marker/marker-detector/MarkerDetector.h"
 
+#include "math/pose-estimation.h"
+
 #include "draw/draw.h"
 
 #include "types.h"
